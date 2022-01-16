@@ -10,8 +10,18 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 // Basic Configuration
 const port = process.env.PORT || 3000;
 
-app.use(express.json()) 
-app.use(express.urlencoded({ extended: true }))
+//Schema 
+const Schema = mongoose.Schema;
+const urlShortenerSchema = new Schema({
+  original_url: String,
+  short_url: String
+});
+
+//model
+const urlShortener = mongoose.model("urlShortener", urlShortenerSchema);
+
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
