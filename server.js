@@ -1,8 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mogoose = require('mongoose');
+const mongoose = require('mongoose');
 const app = express();
+
+//Conect whith data base
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
