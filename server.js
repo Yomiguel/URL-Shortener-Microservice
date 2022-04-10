@@ -1,56 +1,58 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const app = express();
-const shortid = require('shortid');
-
-//Conect whith data base
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Basic Configuration
+const shortid = require("shortid");
 const port = process.env.PORT || 5500;
 
-//Schema 
-const Schema = mongoose.Schema;
-const urlShortenerSchema = new Schema({
-  original_url: String,
-  short_url: String
-});
-
-//model
-const Url = mongoose.model("Url", urlShortenerSchema);
-
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors());
 
-app.use('/public', express.static(`${process.cwd()}/public`));
-
-app.get('/', function(req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
 });
 
-// Your first API endpoint
-app.post('/api/shorturl', function(req, res) {
-  
-  const url = new Url ({
-    original_url: req.body.url,
-    short_url: 1
+const Schema = mongoose.Schema;
+const urlShortenerSchema = new Schema({
+  original_url: String,
+  short_url: String,
+});
+
+const Url = mongoose.model("Url", urlShortenerSchema);
+
+app.use("/public", express.static(`${process.cwd()}/public`));
+
+app.get("/", (req, res) => {
+  res.sendFile(process.cwd() + "/views/index.html");
+});
+
+app.post("/api/shorturl", (req, res) => {
+  let originalUrl = req.body.url;
+  let shortUrl = shortid.generate();
+
+  const url = new Url({
+    original_url: originalUrl,
+    short_url: __dirname + "/api/shorturl/" + shortUrl,
   });
-  
+
   url.save((err) => {
-    if(err) {
+    if (err) {
       return handlerError(err);
-    };
+    }
   });
 
   res.json({
-    original_url: req.body.url
-  })
+    original_url: url.original_url,
+    short_url: url.short_url,
+  });
 });
 
-app.listen(port, function() {
+app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
