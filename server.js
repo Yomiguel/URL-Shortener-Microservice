@@ -61,7 +61,7 @@ app.post("/api/shorturl", (req, res) => {
 app.get("/api/shorturl/:shortUrl", async (req, res) => {
   const dataUrl = await Url.findOne({ short_url: req.params.shortUrl });
   const redirectUrl = dataUrl.short_url;
-  res.redirect(redirectUrl);
+  res.redirect("https://" + redirectUrl);
 });
 
 var listener = app.listen(port, function () {
