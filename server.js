@@ -59,7 +59,11 @@ app.post("/api/shorturl", (req, res) => {
 });
 
 app.get("/api/shorturl/:shortUrl", async (req, res) => {
-  const response = await Url.findOne({ short_url: req.params.shortUrl });
-  const redirectUrl = response.originalUrl;
+  const dataUrl = await Url.findOne({ short_url: req.params.shortUrl });
+  const redirectUrl = dataUrl.short_url;
   res.redirect(redirectUrl);
+});
+
+var listener = app.listen(port, function () {
+  console.log("Your app is listening on port " + listener.address().port);
 });
