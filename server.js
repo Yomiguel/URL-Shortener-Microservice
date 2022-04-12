@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const app = express();
 const shortid = require("shortid");
@@ -9,8 +8,6 @@ const port = process.env.PORT || 5500;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors());
 
@@ -33,26 +30,36 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/shorturl", (req, res) => {
-  let originalUrl = req.body.url;
-  let shortUrl = shortid.generate();
+  const originalUrl = req.body.url;
+  const urlPattern =
+    /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
+  if (urlPattern.test(originalUrl)) {
+    const shortUrl = shortid.generate();
 
-  const url = new Url({
-    original_url: originalUrl,
-    short_url: __dirname + "/api/shorturl/" + shortUrl,
-  });
+    const url = new Url({
+      original_url: originalUrl,
+      short_url: shortUrl,
+    });
 
-  url.save((err) => {
-    if (err) {
-      return handlerError(err);
-    }
-  });
+    url.save((err) => {
+      if (err) {
+        return handlerError(err);
+      }
+    });
 
-  res.json({
-    original_url: url.original_url,
-    short_url: url.short_url,
-  });
+    res.json({
+      original_url: url.original_url,
+      short_url: url.short_url,
+    });
+  } else {
+    res.json({
+      error: "Invalid URL",
+    });
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+app.get("/api/shorturl/:shortUrl", async (req, res) => {
+  const response = await Url.findOne({ short_url: req.params.shortUrl });
+  const redirectUrl = response.originalUrl;
+  res.redirect(redirectUrl);
 });
