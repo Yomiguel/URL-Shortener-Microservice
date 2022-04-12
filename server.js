@@ -11,9 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-});
+mongoose.connect(process.env.MONGO_URI);
 
 const Schema = mongoose.Schema;
 const urlShortenerSchema = new Schema({
